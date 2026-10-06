@@ -1,0 +1,106 @@
+%%{init: {"theme": "base", "flowchart": {"curve": "basis", "nodeSpacing": 30, "rankSpacing": 45}, "themeVariables": {"fontFamily": "Arial", "fontSize": "14px", "primaryColor": "#ffffff", "primaryBorderColor": "#1f2933", "lineColor": "#52606d"}}}%%
+flowchart TB
+    INET(("Internet"))
+
+    subgraph VENDOR["Z7 - THIRD-PARTY VENDOR"]
+        RS["RoboServ Automation GmbH<br/>remote engineers"]
+    end
+
+    subgraph ENT["Z1 - ENTERPRISE ZONE (Purdue L4-L5)"]
+        direction LR
+        WS["Employee<br/>workstations"]
+        AD["Active Directory<br/>apex.local"]
+        ERP["ERP"]
+        MAIL["Email<br/>(cloud-hosted)"]
+    end
+
+    FW1{{"Perimeter firewall"}}
+    FW2{{"IT/OT firewall<br/>(three-legged)"}}
+
+    subgraph IDMZ["Z2 - INDUSTRIAL DMZ (L3.5)"]
+        direction LR
+        VPN["Remote-access gateway<br/>SSL VPN"]
+        JS["Jump server<br/>RDP"]
+        HREP[("Historian<br/>replica")]
+    end
+
+    subgraph OT["Z3 - OT SITE OPERATIONS (L2-L3)"]
+        direction LR
+        HMI["SCADA server<br/>/ HMI x2"]
+        EWS["Engineering<br/>workstation"]
+        HIST[("Historian")]
+        OPC["OPC UA<br/>server"]
+    end
+
+    SW["OT core switch<br/>NO ACLs between L2-L3 and L1"]
+
+    subgraph CTRL["Z4 - CONTROL ZONE (L1)"]
+        direction LR
+        PLC1["PLC-01<br/>Conveyor"]
+        PLC2["PLC-02<br/>Robotic welding"]
+        PLC3["PLC-03<br/>Packaging"]
+    end
+
+    subgraph PROC["Z5 - PHYSICAL PROCESS & SAFETY (L0)"]
+        direction LR
+        IO["Sensors -> PLC I/O -> Actuators / drives"]
+        SAFE["Hardwired safety<br/>e-stops, light curtains"]
+    end
+
+    subgraph IIOT["Z6 - IIoT / CLOUD"]
+        CLOUD["Cloud analytics<br/>platform (SaaS)"]
+        LTE["LTE router<br/>(supplier-managed)"]
+        GW["IIoT gateway"]
+        VIB["Wireless vibration<br/>sensors x24"]
+    end
+
+    INET --- FW1
+    FW1 --- WS
+    FW1 --- MAIL
+    AD --- FW2
+    ERP --- FW2
+    FW2 --- VPN
+    FW2 --- JS
+    FW2 --- HREP
+    FW2 --- HMI
+    FW2 --- HIST
+    RS == "SSL VPN" ==> VPN
+    VPN --> JS
+    JS --> EWS
+    HREP <-- "replication" --> HIST
+    HMI --- SW
+    EWS --- SW
+    OPC --- SW
+    SW --- PLC1
+    SW --- PLC2
+    SW --- PLC3
+    PLC1 --- IO
+    PLC2 --- IO
+    PLC3 --- IO
+    PLC2 ~~~ SAFE
+    CLOUD ===|"↑ MQTT/TLS over LTE<br/>bypasses IDMZ"| LTE
+    LTE <--> GW
+    OPC -- "OPC UA" --> GW
+    GW -.-|"↑ wireless"| VIB
+    RS -. "TeamViewer (unapproved)" .-> EWS
+    AD -. "AD auth direct (skips IDMZ)" .- EWS
+
+    classDef ent fill:#e3ecf7,stroke:#4a78b5,color:#1f2933
+    classDef dmz fill:#fdf1dc,stroke:#c9892b,color:#1f2933
+    classDef ot fill:#e4f2e7,stroke:#3f8f53,color:#1f2933
+    classDef ctrl fill:#dff1ef,stroke:#2f8a80,color:#1f2933
+    classDef proc fill:#f1e8f5,stroke:#8a5aa3,color:#1f2933
+    classDef iiot fill:#fbe7e3,stroke:#c0573f,color:#1f2933
+    classDef vend fill:#f3f0e6,stroke:#8c7a45,color:#1f2933
+    classDef fw fill:#7b2d26,stroke:#7b2d26,color:#ffffff
+    classDef finding fill:#fdecea,stroke:#c0392b,color:#c0392b
+    class ENT ent
+    class IDMZ dmz
+    class OT ot
+    class CTRL ctrl
+    class PROC proc
+    class IIOT iiot
+    class VENDOR vend
+    class FW1,FW2 fw
+    class SW finding
+    linkStyle 24,28,29 stroke:#c0392b,stroke-width:2px

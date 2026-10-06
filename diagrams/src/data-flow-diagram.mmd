@@ -1,0 +1,77 @@
+%%{init: {"theme": "base", "flowchart": {"curve": "basis", "nodeSpacing": 28, "rankSpacing": 50}, "themeVariables": {"fontFamily": "Arial", "fontSize": "13px", "lineColor": "#2f3e4e", "clusterBkg": "#ffffff", "clusterBorder": "#c0392b"}}}%%
+flowchart TB
+    %% External entities = rectangles, processes = circles, data stores = cylinders.
+    %% Mermaid has no left-only arrow, so upward flows are plain lines with ↑ in the label.
+    subgraph TB_INET["TB-1 / TB-7: Internet & third parties"]
+        VEND["Vendor engineer"]
+        SENDER["Internet email / web"]
+        TVR["TeamViewer relay"]
+        CLOUD["Cloud analytics"]
+    end
+
+    subgraph TB_ENT["TB-2: Enterprise"]
+        ITADM["IT administrator"]
+        BIZ["Business users / ERP"]
+        CORP(("Workstations<br/>& email"))
+        AD(("Active<br/>Directory"))
+    end
+
+    subgraph TB_DMZ["TB-3: Industrial DMZ"]
+        VPN(("Remote-access<br/>gateway"))
+        JS(("Jump<br/>server"))
+        HREP[("Historian replica")]
+    end
+
+    subgraph TB_OT["TB-4: OT Site Operations"]
+        OPER["Operator"]
+        USB["Contractor USB media"]
+        HMI(("SCADA /<br/>HMI"))
+        EWS(("Engineering<br/>workstation"))
+        OPC(("OPC UA<br/>server"))
+        HIST[("Historian")]
+    end
+
+    subgraph TB_CTRL["TB-4 / TB-5: Control & process"]
+        PLC(("PLC-01/02/03"))
+        FIELD["Field devices"]
+    end
+
+    subgraph TB_IIOT["TB-6: IIoT"]
+        GW(("IIoT<br/>gateway"))
+        VIB["Vibration sensors"]
+    end
+
+    OPER -- "DF-01 commands" --> HMI
+    HMI -- "DF-02 Modbus/TCP r/w" --> PLC
+    EWS -- "DF-03 program download" --> PLC
+    PLC -- "DF-04 hardwired I/O" --> FIELD
+    OPC ---|"DF-05 tag polling ↑"| PLC
+    OPC -- "DF-06 OPC UA" --> HIST
+    HREP ---|"DF-07 SQL replication ↑"| HIST
+    BIZ -- "DF-08 reports" --> HREP
+    VEND -- "DF-09 SSL VPN" --> VPN
+    VPN -- "DF-10 RDP" --> JS
+    JS -- "DF-11 RDP" --> EWS
+    ITADM -- "DF-12 RDP" --> JS
+    AD ---|"DF-13 Kerberos/LDAP/SMB ↑"| EWS
+    OPC -- "DF-14 OPC UA" --> GW
+    VIB -- "DF-15 wireless" --> GW
+    CLOUD ---|"DF-16 MQTT/TLS via LTE ↑"| GW
+    CLOUD -- "DF-17 config & firmware" --> GW
+    SENDER -- "DF-18 email/web" --> CORP
+    USB -- "DF-19 files" --> EWS
+    TVR -. "DF-20 TeamViewer (unapproved)" .-> EWS
+
+    classDef ext fill:#f4f6f8,stroke:#1f2933,color:#1f2933
+    classDef proc fill:#ffffff,stroke:#2f6f9f,stroke-width:2px,color:#1f2933
+    classDef store fill:#fffaf0,stroke:#7b5e2a,color:#1f2933
+    class VEND,SENDER,TVR,CLOUD,ITADM,BIZ,OPER,USB,FIELD,VIB ext
+    class CORP,AD,VPN,JS,HMI,EWS,OPC,PLC,GW proc
+    class HREP,HIST store
+    style TB_INET stroke-dasharray: 6 4,stroke:#c0392b
+    style TB_ENT stroke-dasharray: 6 4,stroke:#c0392b
+    style TB_DMZ stroke-dasharray: 6 4,stroke:#c0392b
+    style TB_OT stroke-dasharray: 6 4,stroke:#c0392b
+    style TB_CTRL stroke-dasharray: 6 4,stroke:#c0392b
+    style TB_IIOT stroke-dasharray: 6 4,stroke:#c0392b
+    linkStyle 19 stroke:#c0392b,stroke-width:2px

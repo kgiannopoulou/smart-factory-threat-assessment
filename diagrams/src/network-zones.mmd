@@ -1,0 +1,43 @@
+%%{init: {"theme": "base", "flowchart": {"curve": "linear", "nodeSpacing": 40, "rankSpacing": 55}, "themeVariables": {"fontFamily": "Arial", "fontSize": "14px", "lineColor": "#52606d"}}}%%
+flowchart TB
+    Z0["<b>Z0 Internet</b><br/>untrusted"]
+    Z7["<b>Z7 Third-party vendor</b><br/>RoboServ - contractual"]
+    Z1["<b>Z1 Enterprise</b><br/>Purdue L4-L5 | IT baseline"]
+    Z2["<b>Z2 Industrial DMZ</b><br/>L3.5 | SL-T 2 / SL-A 1"]
+    Z3["<b>Z3 OT Site Operations</b><br/>L2-L3 | SL-T 2 / SL-A 1"]
+    Z4["<b>Z4 Control</b><br/>L1 | SL-T 2 / SL-A 0-1"]
+    Z5["<b>Z5 Physical process & safety</b><br/>L0 | hardwired"]
+    Z6["<b>Z6 IIoT / Cloud</b><br/>SL-T 2 / SL-A 0-1"]
+
+    Z0 -- "TB-1 Perimeter firewall<br/>[Enforced]" --- Z1
+    Z1 -- "TB-2 IT/OT firewall, IT leg<br/>[Partially enforced]" --- Z2
+    Z2 -- "TB-3 IT/OT firewall, OT leg<br/>[Partially enforced]" --- Z3
+    Z3 -- "TB-4 none - flat routing<br/>[NOT enforced]" --- Z4
+    Z4 -- "TB-5 hardwired I/O<br/>[Physically enforced]" --- Z5
+    Z7 -- "TB-7 SSL VPN, shared account<br/>[Weak]" --- Z2
+    Z3 -- "TB-6 none (supplier LTE)<br/>[NOT enforced]" --- Z6
+    Z0 -. "LTE uplink - bypass" .- Z6
+    Z7 -. "TeamViewer to EWS - bypass" .- Z3
+    Z1 -. "AD auth direct from Z3 - bypass" .- Z3
+
+    classDef z0 fill:#eef0f2,stroke:#9aa5b1,color:#1f2933
+    classDef z1 fill:#e3ecf7,stroke:#4a78b5,color:#1f2933
+    classDef z2 fill:#fdf1dc,stroke:#c9892b,color:#1f2933
+    classDef z3 fill:#e4f2e7,stroke:#3f8f53,color:#1f2933
+    classDef z4 fill:#dff1ef,stroke:#2f8a80,color:#1f2933
+    classDef z5 fill:#f1e8f5,stroke:#8a5aa3,color:#1f2933
+    classDef z6 fill:#fbe7e3,stroke:#c0573f,color:#1f2933
+    classDef z7 fill:#f3f0e6,stroke:#8c7a45,color:#1f2933
+    class Z0 z0
+    class Z1 z1
+    class Z2 z2
+    class Z3 z3
+    class Z4 z4
+    class Z5 z5
+    class Z6 z6
+    class Z7 z7
+    linkStyle 0,4 stroke:#3f8f53,stroke-width:3px
+    linkStyle 1,2 stroke:#c9892b,stroke-width:3px
+    linkStyle 5 stroke:#c0573f,stroke-width:3px
+    linkStyle 3,6 stroke:#c0392b,stroke-width:3px
+    linkStyle 7,8,9 stroke:#c0392b,stroke-width:2px
